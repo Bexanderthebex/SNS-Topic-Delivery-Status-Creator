@@ -1,0 +1,22 @@
+{
+  "name": "sns-topic-delivery-status-creator",
+  "version": "1.0.0",
+  "description": "Serverless stack to organize the creation of SNS topic delivery status logging ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bexanderthebex/SNS-Topic-Delivery-Status-Creator.git"
+  },
+  "author": "Melbex De Leon <melbex11@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bexanderthebex/SNS-Topic-Delivery-Status-Creator/issues"
+  },
+  "homepage": "https://github.com/Bexanderthebex/SNS-Topic-Delivery-Status-Creator#readme",
+  "dependencies": {
+    "aws-sdk": "^2.930.0"
+  }
+}

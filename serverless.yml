@@ -1,0 +1,70 @@
+service: SNS-topic-delivery-status-logging-example
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  region: 'us-west-2'
+  deploymentBucket: sns-topic-delivery-status-logging-example
+  versionFunctions: false
+
+functions:
+  snsTopicDeliveryStatusLoggingCreator:
+    handler: topic-delivery-status-creator.handler
+    timeout: 900
+
+resources:
+  Resources:
+    SampleSNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: sample-sns-topic
+    SampleSNSTopicQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: sample-sns-topic-queue
+    # allows SNS topic subscription for the queue
+    SampleSNSTopicQueuePolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - !Ref SampleSNSTopicQueue
+        PolicyDocument:
+          Statement:
+            Effect: Allow
+            Principal: "*"
+            Action: "sqs:*"
+            Resource: !GetAtt SampleSNSTopicQueue.Arn
+    SampleSNSTopicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: !GetAtt SampleSNSTopicQueue.Arn
+        Protocol: sqs
+        RawMessageDelivery: true
+        TopicArn: !Ref SampleSNSTopic
+    SNSTopicDeliveryStatusLoggingCreatorRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: sns-topic-delivery-status-creator-role
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: sns.amazonaws.com
+              Action: 'sts:AssumeRole'
+        Policies:
+          - PolicyName: sns-topic-delivery-status-creator-role-policy
+            PolicyDocument:
+              Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:*
+                Resource: !GetAtt SampleSNSTopicQueue.Arn
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "logs:PutMetricFilter"
+                  - "logs:PutRetentionPolicy"
+                Resource:
+                  - "*"
