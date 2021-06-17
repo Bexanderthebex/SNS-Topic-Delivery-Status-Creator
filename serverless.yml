@@ -1,4 +1,4 @@
-service: SNS-topic-delivery-status-logging-example
+service: SNS-topic-delivery-status-logging
 frameworkVersion: '2'
 
 provider:
@@ -9,7 +9,9 @@ provider:
 
 functions:
   snsTopicDeliveryStatusLoggingCreator:
+    name: topic-delivery-status-creator
     handler: topic-delivery-status-creator.handler
+    role: !GetAtt LambdaSNSTopicDeliveryStatusLoggingCreatorRole.Arn
     timeout: 900
 
 resources:
@@ -68,3 +70,32 @@ resources:
                   - "logs:PutRetentionPolicy"
                 Resource:
                   - "*"
+    LambdaSNSTopicDeliveryStatusLoggingCreatorRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: sns-topic-delivery-status-creator-lambda-role
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: 'sts:AssumeRole'
+        Policies:
+          - PolicyName: sns-topic-delivery-status-creator-lambda-role-policy
+            PolicyDocument:
+              Statement:
+              - Effect: Allow
+                Action: 
+                  - sns:SetTopicAttributes
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "logs:*"
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt SNSTopicDeliveryStatusLoggingCreatorRole.Arn
